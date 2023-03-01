@@ -16,6 +16,13 @@ test('todo `model` (Object) has desired keys', function (t) {
     t.end();
   });
 
-  //add comment
+//Tests to test basic functionality for defualt case
+test('todo `update` default case should return model unmodified', function (t) {
+  const model = JSON.parse(JSON.stringify(app.model));
+  const unmodified_model = app.update('UNKNOWN_ACTION', model);
+  t.deepEqual(model, unmodified_model, "model returned unmodified");
+  t.end();
+});
+
 
   
