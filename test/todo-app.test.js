@@ -5,6 +5,7 @@ const path = require('path');       // so we can open files cross-platform
 const html = fs.readFileSync(path.resolve(__dirname, '../index.html'));
 require('jsdom-global')(html);      // https://github.com/rstacruz/jsdom-global
 const app = require('../lib/todo-app.js'); // functions to test
+const elmish = require('../lib/elmish.js'); // elmish functions brought over
 const id = 'test-app';              // all tests use 'test-app' as root element
 
 //Now we start to write our tests for todo-app
@@ -66,7 +67,7 @@ test('`TOGGLE` (undo) a todo item from done=true to done=false', function (t) {
 
 
 //Tests for rendering a single To-Do-List Item
-test.only('render_item HTML for a single Todo Item', function (t) {
+test('render_item HTML for a single Todo Item', function (t) {
   const model = {
     todos: [
       { id: 1, title: "Learn Elm Architecture", done: true },
@@ -82,6 +83,33 @@ test.only('render_item HTML for a single Todo Item', function (t) {
   const checked = document.querySelectorAll('input')[0].checked;
   t.equal(checked, true, 'Done: ' + model.todos[0].title + " is done=true");
 
+  elmish.empty(document.getElementById(id)); // clear DOM ready for next test
+  t.end();
+});
+
+// render main test
+test('render "main" view using (elmish) HTML DOM functions', function (t) {
+  const model = {
+    todos: [
+      { id: 1, title: "Learn Elm Architecture", done: true },
+      { id: 2, title: "Build Todo List App",    done: false },
+      { id: 3, title: "Win the Internet!",      done: false }
+    ],
+    hash: '#/' // the "route" to display
+  };
+  // render the "main" view and append it to the DOM inside the `test-app` node:
+  document.getElementById(id).appendChild(app.render_main(model));
+  // test that the title text in the model.todos was rendered to <label> nodes:
+  document.querySelectorAll('.view').forEach(function (item, index) {
+    t.equal(item.textContent, model.todos[index].title,
+      "index #" + index + " <label> text: " + item.textContent)
+  })
+
+  const inputs = document.querySelectorAll('input'); // todo items are 1,2,3
+  [true, false, false].forEach(function(state, index){
+    t.equal(inputs[index + 1].checked, state,
+      "Todo #" + index + " is done=" + state)
+  })
   elmish.empty(document.getElementById(id)); // clear DOM ready for next test
   t.end();
 });
