@@ -113,3 +113,79 @@ test('render "main" view using (elmish) HTML DOM functions', function (t) {
   elmish.empty(document.getElementById(id)); // clear DOM ready for next test
   t.end();
 });
+
+//tests for footer segment
+test('render_footer view using (elmish) HTML DOM functions', function (t) {
+  const model = {
+    todos: [
+      { id: 1, title: "Learn Elm Architecture", done: true },
+      { id: 2, title: "Build Todo List App",    done: false },
+      { id: 3, title: "Win the Internet!",      done: false }
+    ],
+    hash: '#/' // the "route" to display
+  };
+  // render_footer view and append it to the DOM inside the `test-app` node:
+  document.getElementById(id).appendChild(app.render_footer(model));
+
+  // todo-count should display 2 items left (still to be done):
+  const left = document.getElementById('count').innerHTML;
+  t.equal(left, "<strong>2</strong> items left", "Todos remaining: " + left);
+
+  // count number of footer <li> items:
+  t.equal(document.querySelectorAll('li').length, 3, "3 <li> in <footer>");
+
+  // check footer link text and href:
+  const link_text = ['All', 'Active', 'Completed'];
+  const hrefs = ['#/', '#/active', '#/completed'];
+  document.querySelectorAll('a').forEach(function (a, index) {
+    // check link text:
+    t.equal(a.textContent, link_text[index], "<footer> link #" + index
+      + " is: " + a.textContent + " === " + link_text[index]);
+    // check hrefs:
+    t.equal(a.href.replace('about:blank', ''), hrefs[index],
+    "<footer> link #" + index + " href is: " + hrefs[index]);
+  });
+
+  // check for "Clear completed" button in footer:
+  const clear = document.querySelectorAll('.clear-completed')[0].textContent;
+  t.equal(clear, 'Clear completed', '<button> in <footer> "Clear completed"');
+
+  elmish.empty(document.getElementById(id)); // clear DOM ready for next test
+  t.end();
+});
+test('render_footer 1 item left (pluarisation test)', function (t) {
+  const model = {
+    todos: [
+      { id: 1, title: "Be excellent to each other!", done: false }
+    ],
+    hash: '#/' // the "route" to display
+  };
+  // render_footer view and append it to the DOM inside the `test-app` node:
+  document.getElementById(id).appendChild(app.render_footer(model));
+
+  // todo-count should display "1 item left" (still to be done):
+  const left = document.getElementById('count').innerHTML;
+  t.equal(left, "<strong>1</strong> item left", "Todos remaining: " + left);
+
+  elmish.empty(document.getElementById(id)); // clear DOM ready for next test
+  t.end();
+});
+
+// view tests
+test.only('view renders the whole todo app using "partials"', function (t) {
+  // render the view and append it to the DOM inside the `test-app` node:
+  document.getElementById(id).appendChild(app.view(app.model)); // initial_model
+
+  t.equal(document.querySelectorAll('h1')[0].textContent, "todos", "<h1>todos");
+  // placeholder:
+  const placeholder = document.getElementById('new-todo')
+    .getAttribute("placeholder");
+  t.equal(placeholder, "What needs to be done?", "paceholder set on <input>");
+
+  // todo-count should display "0 items left" (based on initial_model):
+  const left = document.getElementById('count').innerHTML;
+  t.equal(left, "<strong>0</strong> items left", "Todos remaining: " + left);
+
+  elmish.empty(document.getElementById(id)); // clear DOM ready for next test
+  t.end();
+});
